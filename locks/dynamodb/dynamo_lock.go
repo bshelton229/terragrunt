@@ -2,13 +2,14 @@ package dynamodb
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/gruntwork-io/terragrunt/errors"
 	"github.com/gruntwork-io/terragrunt/locks"
-	"github.com/gruntwork-io/terragrunt/aws_helper"
 	"github.com/gruntwork-io/terragrunt/options"
 )
 
@@ -47,9 +48,9 @@ func New(conf map[string]string) (locks.Lock, error) {
 
 // Fill in default configuration values for this lock
 func (dynamoLock *DynamoDbLock) fillDefaults() {
-	if dynamoLock.AwsRegion == "" {
-		dynamoLock.AwsRegion = DEFAULT_AWS_REGION
-	}
+	// if dynamoLock.AwsRegion == "" {
+	// 	dynamoLock.AwsRegion = DEFAULT_AWS_REGION
+	// }
 
 	if dynamoLock.TableName == "" {
 		dynamoLock.TableName = DEFAULT_TABLE_NAME
@@ -101,12 +102,14 @@ func (dynamoLock DynamoDbLock) String() string {
 
 // Create an authenticated client for DynamoDB
 func createDynamoDbClient(awsRegion string) (*dynamodb.DynamoDB, error) {
-	config, err := aws_helper.CreateAwsConfig(awsRegion)
+	// config, err := aws_helper.CreateAwsConfig(awsRegion)
+	os.Setenv("AWS_SDK_LOAD_CONFIG", "1")
+	sess, err := session.NewSession(&aws.Config{Region: aws.String(awsRegion)})
 	if err != nil {
 		return nil, err
 	}
 
-	return dynamodb.New(session.New(), config), nil
+	return dynamodb.New(sess), nil
 }
 
 var StateFileIdMissing = fmt.Errorf("state_file_id cannot be empty")

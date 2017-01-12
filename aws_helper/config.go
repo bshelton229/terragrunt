@@ -8,7 +8,7 @@ import (
 
 // Returns an AWS config object for the given region, ensuring that the config has credentials
 func CreateAwsConfig(awsRegion string) (*aws.Config, error) {
-	config := defaults.Get().Config.WithRegion(awsRegion)
+	config := defaults.Get().Config
 
 	_, err := config.Credentials.Get()
 	if err != nil {
